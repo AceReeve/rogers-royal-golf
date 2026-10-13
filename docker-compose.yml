@@ -1,0 +1,18 @@
+# App listens on 3000 in the container; host http://localhost:3010
+# Compose substitutes ${...} from a `.env` file in this folder (copy from .env.example).
+# Production: set APP_URL=https://yourdomain.com in .env (runtime) and/or pass a public
+# NEXT_PUBLIC_APP_URL at `docker compose build` so Maya success/failure redirects use your domain.
+services:
+  web:
+    build:
+      context: .
+      args:
+        NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL}
+        NEXT_PUBLIC_SUPABASE_ANON_KEY: ${NEXT_PUBLIC_SUPABASE_ANON_KEY}
+        NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-http://localhost:3010}
+    ports:
+      - "3010:3000"
+    env_file:
+      - path: .env
+        required: false
+    restart: unless-stopped
