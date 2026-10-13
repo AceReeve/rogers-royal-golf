@@ -4,6 +4,7 @@ import { createServiceRoleClient } from '@/lib/supabase/service-role'
 import { NextResponse } from 'next/server'
 import { DEFAULT_TOUR_CATEGORY } from '@/lib/tours/constants'
 import { CACHE_CONTROL } from '@/lib/http/cache-control'
+import { getStoreId } from '@/lib/store'
 
 export async function GET(request: Request) {
   const supabase = await createClient()
@@ -17,7 +18,8 @@ export async function GET(request: Request) {
     const page = parseInt(searchParams.get('page') || '1')
     const limit = 12
 
-    let query = supabase.from('tours').select('*')
+    const storeId = await getStoreId(request)
+    let query = supabase.from('tours').select('*').eq('store', storeId)
 
     if (destination) {
       query = query.ilike('destination', `%${destination}%`)
@@ -90,6 +92,7 @@ export async function POST(request: Request) {
         : DEFAULT_TOUR_CATEGORY
 
     const db = createServiceRoleClient()
+    const store = await getStoreId(request)
     const { data, error } = await db.from('tours').insert({
       name,
       destination,
@@ -99,6 +102,7 @@ export async function POST(request: Request) {
       duration_days,
       image_url,
       max_participants,
+      store,
     })
 
     if (error) throw error

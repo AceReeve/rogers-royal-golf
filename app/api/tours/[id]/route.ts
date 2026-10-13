@@ -1,16 +1,18 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import { CACHE_CONTROL } from '@/lib/http/cache-control'
+import { getStoreId } from '@/lib/store'
 
 export async function GET(
-  _request: Request,
+  request: Request,
   context: { params: Promise<{ id: string }> }
 ) {
   const { id } = await context.params
   const supabase = await createClient()
+  const storeId = await getStoreId(request)
 
   try {
-    const { data, error } = await supabase.from('tours').select('*').eq('id', id).maybeSingle()
+    const { data, error } = await supabase.from('tours').select('*').eq('id', id).eq('store', storeId).maybeSingle()
 
     if (error) throw error
     if (!data) {

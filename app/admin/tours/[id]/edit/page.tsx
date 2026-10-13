@@ -3,11 +3,13 @@ import { notFound } from 'next/navigation'
 import { ArrowLeft } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { AdminTourForm } from '@/components/admin/tour-form'
+import { getStoreId } from '@/lib/store'
 
 export default async function EditTourPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   const supabase = await createClient()
-  const { data: tour } = await supabase.from('tours').select('*').eq('id', id).maybeSingle()
+  const storeId = await getStoreId()
+  const { data: tour } = await supabase.from('tours').select('*').eq('id', id).eq('store', storeId).maybeSingle()
 
   if (!tour) notFound()
 

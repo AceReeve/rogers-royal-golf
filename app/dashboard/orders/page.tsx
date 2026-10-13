@@ -6,9 +6,11 @@ import { getOrderBillingSnapshot } from '@/lib/orders/billing-types'
 import { getOrderItemProductName } from '@/lib/orders/order-item-display'
 import { formatOrderStatusLabel, orderStatusBadgeClass } from '@/lib/orders/status'
 import { createClient } from '@/lib/supabase/server'
+import { getStoreId } from '@/lib/store'
 
 export default async function OrdersPage() {
   const supabase = await createClient()
+  const storeId = await getStoreId()
   const {
     data: { user },
   } = await supabase.auth.getUser()
@@ -20,6 +22,7 @@ export default async function OrdersPage() {
       order_items(id, quantity, price, product_name, products(name, image_url))
     `)
     .eq('user_id', user?.id)
+    .eq('store', storeId)
     .order('created_at', { ascending: false })
 
   return (

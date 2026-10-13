@@ -5,6 +5,7 @@ import { fetchUserRoleForAdmin, isAdmin } from '@/lib/auth/is-admin'
 import { createClient } from '@/lib/supabase/server'
 import { createServiceRoleClient } from '@/lib/supabase/service-role'
 import { isOrderFulfillmentStatus } from '@/lib/orders/status'
+import { getStoreId } from '@/lib/store'
 
 export type OrderActionResult = { error: string } | { ok: true }
 
@@ -38,6 +39,7 @@ export async function updateOrderStatus(
   }
 
   const db = createServiceRoleClient()
+  const storeId = await getStoreId()
   const { error } = await db
     .from('orders')
     .update({
@@ -45,6 +47,7 @@ export async function updateOrderStatus(
       updated_at: new Date().toISOString(),
     })
     .eq('id', orderId)
+    .eq('store', storeId)
 
   if (error) {
     return { error: error.message }

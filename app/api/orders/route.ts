@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServiceRoleClient } from '@/lib/supabase/service-role'
+import { getStoreId } from '@/lib/store'
 
 export async function POST(request: NextRequest) {
   try {
@@ -14,6 +15,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Create order
+    const store = await getStoreId(request)
     const { data: order, error: orderError } = await supabase
       .from('orders')
       .insert({
@@ -21,6 +23,7 @@ export async function POST(request: NextRequest) {
         total_amount: totalAmount,
         status: status || 'pending',
         payment_id: paymentId,
+        store,
       })
       .select()
       .single()
@@ -94,6 +97,7 @@ export async function GET(request: NextRequest) {
       )
     }
 
+    const storeId = await getStoreId(request)
     const { data: orders, error } = await supabase
       .from('orders')
       .select(`
@@ -102,6 +106,7 @@ export async function GET(request: NextRequest) {
         tour_bookings(id, tour_id, number_of_participants, total_price, tours(id, name, destination, category, price))
       `)
       .eq('user_id', data.user.id)
+      .eq('store', storeId)
       .order('created_at', { ascending: false })
 
     if (error) throw error

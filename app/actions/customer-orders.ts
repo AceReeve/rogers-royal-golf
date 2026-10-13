@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { createServiceRoleClient } from '@/lib/supabase/service-role'
 import { normalizeOrderStatus, isOutForDeliveryStatus } from '@/lib/orders/status'
+import { getStoreId } from '@/lib/store'
 
 export type OrderActionResult = { error: string } | { ok: true }
 
@@ -23,10 +24,12 @@ export async function confirmOrderDelivered(orderId: string): Promise<OrderActio
   }
 
   const db = createServiceRoleClient()
+  const storeId = await getStoreId()
   const { data: order, error: fetchError } = await db
     .from('orders')
     .select('id, user_id, status')
     .eq('id', orderId)
+    .eq('store', storeId)
     .maybeSingle()
 
   if (fetchError || !order) {
@@ -49,6 +52,7 @@ export async function confirmOrderDelivered(orderId: string): Promise<OrderActio
       updated_at: new Date().toISOString(),
     })
     .eq('id', orderId)
+    .eq('store', storeId)
 
   if (updateError) {
     return { error: updateError.message }

@@ -2,9 +2,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { ShoppingBag, Plane, DollarSign, TrendingUp } from 'lucide-react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
+import { getStoreId } from '@/lib/store'
 
 export default async function DashboardPage() {
   const supabase = await createClient()
+  const storeId = await getStoreId()
   const {
     data: { user },
   } = await supabase.auth.getUser()
@@ -14,6 +16,7 @@ export default async function DashboardPage() {
     .from('orders')
     .select('id, total_amount, created_at')
     .eq('user_id', user?.id)
+    .eq('store', storeId)
     .order('created_at', { ascending: false })
 
   const { data: bookings } = await supabase

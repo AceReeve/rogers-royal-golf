@@ -1,5 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { sendOrderConfirmationEmail } from '@/lib/email/send-order-confirmation'
+import { getStoreId } from '@/lib/store'
 
 function cleanEnvValue(value?: string) {
   return value?.trim().replace(/^['"]|['"]$/g, '') ?? ''
@@ -173,6 +174,7 @@ export async function completeOrderFromMayaPayment(
       shipping_city: billingInfo.city || null,
       shipping_postal_code: billingInfo.zipCode || null,
       shipping_country: 'PH',
+      store: await getStoreId(),
       // Snapshot in `notes` so orders work without a `billing_info` DB column. If you add
       // billing_info (scripts/02-add-orders-billing-info.sql), you can backfill from notes.
       notes: JSON.stringify({ unoCheckoutBilling: billingSnapshot }),

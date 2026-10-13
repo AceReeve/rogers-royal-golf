@@ -2,15 +2,17 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { ShoppingBag, Plane, DollarSign, Users } from 'lucide-react'
 import Link from 'next/link'
 import { createServiceRoleClient } from '@/lib/supabase/service-role'
+import { getStoreId } from '@/lib/store'
 
 export default async function AdminDashboard() {
   const supabase = createServiceRoleClient()
+  const storeId = await getStoreId()
 
   const { data: products } = await supabase.from('products').select('id, price')
 
-  const { data: tours } = await supabase.from('tours').select('id, price')
+  const { data: tours } = await supabase.from('tours').select('id, price').eq('store', storeId)
 
-  const { data: orders } = await supabase.from('orders').select('total_amount, status')
+  const { data: orders } = await supabase.from('orders').select('total_amount, status').eq('store', storeId)
 
   const { count: userCount } = await supabase
     .from('users')

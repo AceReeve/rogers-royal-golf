@@ -2,15 +2,18 @@ import Link from 'next/link'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Edit2, Plus, MapPin } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
+import { getStoreId } from '@/lib/store'
 import { DeleteCatalogButton } from '@/components/admin/delete-catalog-button'
 import { tourUnitPrice } from '@/lib/tours/tour-price'
 import { tourDisplayName } from '@/lib/tours/display-name'
 
 export default async function AdminToursPage() {
   const supabase = await createClient()
+  const storeId = await getStoreId()
   const { data: tours } = await supabase
     .from('tours')
     .select('*')
+    .eq('store', storeId)
     .order('created_at', { ascending: false })
 
   return (

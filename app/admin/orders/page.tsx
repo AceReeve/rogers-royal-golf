@@ -6,9 +6,11 @@ import { getOrderBillingSnapshot } from '@/lib/orders/billing-types'
 import { getOrderItemProductName } from '@/lib/orders/order-item-display'
 import { formatOrderStatusLabel, orderStatusBadgeClass } from '@/lib/orders/status'
 import { createServiceRoleClient } from '@/lib/supabase/service-role'
+import { getStoreId } from '@/lib/store'
 
 export default async function AdminOrdersPage() {
   const supabase = createServiceRoleClient()
+  const storeId = await getStoreId()
   const { data: orders } = await supabase
     .from('orders')
     .select(`
@@ -16,6 +18,7 @@ export default async function AdminOrdersPage() {
       users(email, full_name),
       order_items(id, quantity, price, product_name, products(name))
     `)
+    .eq('store', storeId)
     .order('created_at', { ascending: false })
 
   return (
